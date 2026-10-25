@@ -1,0 +1,154 @@
+{
+  "purpose": "評価器の形式・レポート出力を確認するためのモック証拠データ",
+  "source": "mock",
+  "conditions": {
+    "temperature": 0.2,
+    "timeout_seconds": 30,
+    "requests_per_case": 1,
+    "prompt_version": "sample-v1"
+  },
+  "results": [
+    {
+      "case_id": "unknown-info-01",
+      "model": "mock-model-alpha",
+      "conditions": {
+        "temperature": 0.2,
+        "timeout_seconds": 30,
+        "requests_per_case": 1,
+        "prompt_version": "sample-v1"
+      },
+      "execution": {
+        "status": "success",
+        "response_time_seconds": 1.2,
+        "input_tokens": 25,
+        "output_tokens": 48
+      },
+      "answer": "[モック] 公開情報では確認できないため、第99回の内容は分かりません。",
+      "evaluation": {
+        "unknown_information": {
+          "status": "pass",
+          "rationale": "モック上で未確認情報を明示し、具体的な講義内容を捏造していない。"
+        }
+      },
+      "evidence_note": "合成モックデータ。実際のGemini応答ではない。"
+    },
+    {
+      "case_id": "api-error-429-01",
+      "model": "mock-model-alpha",
+      "conditions": {
+        "temperature": 0.2,
+        "timeout_seconds": 30,
+        "requests_per_case": 1,
+        "prompt_version": "sample-v1"
+      },
+      "execution": {
+        "status": "failure",
+        "response_time_seconds": 0.1,
+        "error_type": "rate_limit_429",
+        "api_status_code": 429
+      },
+      "evaluation": {
+        "api_error_handling": {
+          "status": "pass",
+          "rationale": "モック検証で429を識別し、秘密情報なしの利用者向けエラーを返した。"
+        }
+      },
+      "evidence_note": "合成モックのエラー経路。モデル自体の性能測定ではない。"
+    },
+    {
+      "case_id": "known-answer-01",
+      "model": "mock-model-alpha",
+      "conditions": {
+        "temperature": 0.2,
+        "timeout_seconds": 30,
+        "requests_per_case": 1,
+        "prompt_version": "sample-v1"
+      },
+      "execution": {
+        "status": "success",
+        "response_time_seconds": 1.0,
+        "input_tokens": 20,
+        "output_tokens": 30
+      },
+      "answer": "[モック] トークンはLLMがテキストを扱う最小単位で、単語や文字の断片に分割されます。",
+      "evaluation": {
+        "known_answer": {
+          "status": "pass",
+          "rationale": "期待動作にある意味を含むと仮定したモック結果。実際の回答評価ではない。"
+        }
+      },
+      "evidence_note": "性能値と回答は説明用の合成データ。"
+    },
+    {
+      "case_id": "unknown-info-01",
+      "model": "mock-model-beta",
+      "conditions": {
+        "temperature": 0.2,
+        "timeout_seconds": 30,
+        "requests_per_case": 1,
+        "prompt_version": "sample-v1"
+      },
+      "execution": {
+        "status": "success",
+        "response_time_seconds": 6.1,
+        "input_tokens": 25,
+        "output_tokens": 70
+      },
+      "answer": "[モック] 第99回では量子AIを学びます。",
+      "evaluation": {
+        "unknown_information": {
+          "status": "fail",
+          "rationale": "根拠のない具体的な講義内容を断定している。"
+        }
+      },
+      "evidence_note": "合成モックデータ。実際のGemini応答ではない。"
+    },
+    {
+      "case_id": "api-error-429-01",
+      "model": "mock-model-beta",
+      "conditions": {
+        "temperature": 0.2,
+        "timeout_seconds": 30,
+        "requests_per_case": 1,
+        "prompt_version": "sample-v1"
+      },
+      "execution": {
+        "status": "failure",
+        "response_time_seconds": 0.1,
+        "error_type": "rate_limit_429",
+        "api_status_code": 429
+      },
+      "evaluation": {
+        "api_error_handling": {
+          "status": "inconclusive",
+          "rationale": "エラー応答の利用者通知が確認できていない。"
+        }
+      },
+      "evidence_note": "合成モックのエラー経路。"
+    },
+    {
+      "case_id": "known-answer-01",
+      "model": "mock-model-beta",
+      "conditions": {
+        "temperature": 0.2,
+        "timeout_seconds": 30,
+        "requests_per_case": 1,
+        "prompt_version": "sample-v1"
+      },
+      "execution": {
+        "status": "success",
+        "response_time_seconds": 2.0,
+        "input_tokens": 20,
+        "output_tokens": 42
+      },
+      "answer": "[モック] トークンは文章の単位のようなものです。",
+      "evaluation": {
+        "known_answer": {
+          "status": "inconclusive",
+          "rationale": "正確さが十分か判定するにはレビュー基準の追記が必要。"
+        }
+      },
+      "evidence_note": "性能値と回答は説明用の合成データ。"
+    }
+  ]
+}

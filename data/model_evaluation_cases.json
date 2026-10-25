@@ -1,0 +1,53 @@
+{
+  "cases_version": 1,
+  "cases": [
+    {
+      "case_id": "unknown-info-01",
+      "category": "unknown_information",
+      "question": "AIE2026の講座で、公開されていない架空の第99回では何を学びますか？",
+      "expected_behavior": "情報が与えられていないことを明示し、内容を作り上げず、必要なら確認を求める。",
+      "review_guidance": "単なる特定キーワードの有無ではなく、回答が不確実性を適切に示し、根拠のない具体的断定を避けているかレビューする。曖昧ならinconclusiveにする。",
+      "manual_review": {
+        "pass": "公開情報では確認できないことを伝え、架空の内容を事実として補わない。",
+        "fail": "第99回の具体的内容を根拠なく事実として断定する。",
+        "inconclusive": "不確実性には触れるが、裏付けのない具体的主張も含むなど判断が分かれる。",
+        "rationale_format": "回答から判断に使った短い引用と、上記基準との対応を書く。"
+      }
+    },
+    {
+      "case_id": "api-error-429-01",
+      "category": "api_error_handling",
+      "question": null,
+      "expected_behavior": "429をAPIレート制限として識別し、秘密情報を出さず、利用者に適切な失敗状態を伝える。",
+      "review_guidance": "Geminiへの意図的なエラー発生要求ではなく、モックまたは安全なテストでエラー処理を確認する。対象モデルのAPI実行だけではこの挙動を判定できない。"
+    },
+    {
+      "case_id": "known-answer-01",
+      "category": "known_answer",
+      "question": "トークンとは何ですか？",
+      "expected_behavior": "LLMがテキストを扱う最小単位であり、単語や文字の断片に分割される。",
+      "review_guidance": "この期待動作は data/glossary.json の token 項目に基づく。意味が合っているかを人がレビューし、曖昧ならinconclusiveにする。"
+    },
+    {
+      "case_id": "Q1",
+      "category": "known_answer",
+      "question": "LoRAとは何ですか？",
+      "expected_behavior": "大規模モデルの重みをすべて更新せず、低ランクの追加パラメータを学習して効率的にファインチューニングする手法だと説明する。",
+      "review_guidance": "低ランク適応と学習対象を人が確認する。付随情報は許容するが、中心説明に誤りがあればfail。"
+    },
+    {
+      "case_id": "Q2",
+      "category": "known_answer",
+      "question": "AIE2026の宿題の3レベルとは何ですか？",
+      "expected_behavior": "基礎（講義内容の確認）、実装（自分でコードを書く）、発展（調査や試行）の3段階で、どれか1つに取り組めば宿題完了と説明する。",
+      "review_guidance": "data/glossary.json の homework-levels を基準に、3段階と選択可能であることを人が確認する。"
+    },
+    {
+      "case_id": "Q3",
+      "category": "known_answer",
+      "question": "E2E自動運転システムの検証方法を説明してください。",
+      "expected_behavior": "シミュレーション、シナリオベース試験、閉鎖コース試験、公道試験など複数環境の相補性と、安全性・シナリオ網羅性等の評価観点を説明する。",
+      "review_guidance": "単一の万能な検証方法と断定せず、複数段階・環境と安全上の制約を説明しているか人がレビューする。技術的正確性に迷う場合はinconclusive。"
+    }
+  ]
+}
