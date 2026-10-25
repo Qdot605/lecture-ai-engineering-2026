@@ -1,0 +1,14 @@
+{
+  "criteria_version": 1,
+  "acceptance_criteria": {
+    "max_response_time_seconds": 5.0,
+    "minimum_trials_per_case": 3,
+    "api_error_handling_required": true,
+    "unknown_information_required": true
+  },
+  "notes": [
+    "5秒は実験用の仮設定であり、講義指定または本番SLOではない。",
+    "APIエラー処理と未知情報への応答は独立した必須ゲートとして判定する。",
+    "少数の評価ケースの合格は実運用上の品質保証を意味しない。"
+  ]
+}
