@@ -9,9 +9,10 @@ from pydantic_ai import DeferredToolRequests
 from pydantic_ai.messages import ToolCallPart, ToolReturnPart
 from pydantic_ai.models.test import TestModel
 
-from app.agent import agent
+from app.agent import agent, approve_deferred_tools
+from app import tools
 
-BASE_TOOLS = {"search_glossary", "get_lecture_summary"}
+BASE_TOOLS = {"search_glossary", "get_lecture_summary", "make_quiz", "save_learning_log"}
 
 
 def _parts(result, kind):
@@ -40,3 +41,67 @@ def test_glossary_result_reaches_the_model():
         result = agent.run_sync("RAGとは？")
     returns = _parts(result, ToolReturnPart)
     assert returns and returns[0].tool_name == "search_glossary"
+
+
+class SaveLogTestModel(TestModel):
+    def gen_tool_args(self, tool_def):
+        if tool_def.name == "save_learning_log":
+            return {"topic": "承認テスト", "content": "承認後に保存する"}
+        return super().gen_tool_args(tool_def)
+
+
+def _request_learning_log_save(log_path, monkeypatch):
+    monkeypatch.setattr(tools, "LEARNING_LOG_PATH", log_path)
+    model = SaveLogTestModel(call_tools=["save_learning_log"])
+    with agent.override(model=model):
+        result = agent.run_sync("学習記録を保存して")
+    assert isinstance(result.output, DeferredToolRequests)
+    assert len(result.output.approvals) == 1
+    return result
+
+
+def _resume_with_approval(result, deferred_results):
+    with agent.override(model=TestModel(call_tools=[])):
+        return agent.run_sync(
+            message_history=result.all_messages(),
+            deferred_tool_results=deferred_results,
+        )
+
+
+def test_learning_log_is_not_written_before_approval(tmp_path, monkeypatch):
+    log_path = tmp_path / "agent_learning_log.md"
+
+    _request_learning_log_save(log_path, monkeypatch)
+
+    assert not log_path.exists()
+
+
+def test_learning_log_is_appended_after_approval(tmp_path, monkeypatch, capsys):
+    log_path = tmp_path / "agent_learning_log.md"
+    log_path.write_text("# Existing log\n", encoding="utf-8")
+    result = _request_learning_log_save(log_path, monkeypatch)
+    monkeypatch.setattr("builtins.input", lambda _: "y")
+
+    deferred_results = approve_deferred_tools(result.output)
+    prompt = capsys.readouterr().out
+    assert "承認テスト" in prompt
+    assert "承認後に保存する" in prompt
+    _resume_with_approval(result, deferred_results)
+
+    saved = log_path.read_text(encoding="utf-8")
+    assert saved.startswith("# Existing log\n")
+    assert "### 学習テーマ\n承認テスト" in saved
+    assert "### 学習内容\n承認後に保存する" in saved
+
+
+def test_learning_log_is_not_written_when_approval_is_rejected(tmp_path, monkeypatch):
+    log_path = tmp_path / "agent_learning_log.md"
+    original = "# Existing log\n"
+    log_path.write_text(original, encoding="utf-8")
+    result = _request_learning_log_save(log_path, monkeypatch)
+    monkeypatch.setattr("builtins.input", lambda _: "n")
+
+    deferred_results = approve_deferred_tools(result.output)
+    _resume_with_approval(result, deferred_results)
+
+    assert log_path.read_text(encoding="utf-8") == original
