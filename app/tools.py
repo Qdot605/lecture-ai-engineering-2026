@@ -5,10 +5,13 @@
 """
 
 import json
+import random
+from datetime import datetime
 from functools import cache
 from pathlib import Path
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
+LEARNING_LOG_PATH = Path(__file__).resolve().parent.parent / "learning_log" / "agent_learning_log.md"
 MAX_RESULTS = 3
 
 
@@ -16,6 +19,46 @@ MAX_RESULTS = 3
 def load_glossary() -> list[dict]:
     with open(DATA_DIR / "glossary.json", encoding="utf-8") as f:
         return json.load(f)["terms"]
+
+
+def save_learning_log(topic: str, content: str) -> str:
+    """学習テーマと内容を Markdown の学習記録に追記する。
+
+    学習したことや気づきを記録として残したいときに使う。
+    topic は学習テーマ、content は学習内容を表す。保存前にユーザーの承認が必要。
+    """
+    if not topic.strip() or not content.strip():
+        return "学習テーマと学習内容の両方を入力してください。空の記録は保存しません。"
+
+    timestamp = datetime.now().astimezone().isoformat(timespec="seconds")
+    entry = (
+        f"## {timestamp}\n\n"
+        f"### 学習テーマ\n{topic.strip()}\n\n"
+        f"### 学習内容\n{content.strip()}\n\n"
+        "---\n\n"
+    )
+    LEARNING_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+    with LEARNING_LOG_PATH.open("a", encoding="utf-8") as log_file:
+        log_file.write(entry)
+    return "学習記録を learning_log/agent_learning_log.md に追記しました。"
+
+
+def make_quiz(lecture: int) -> str:
+    """指定した回の用語から1つを選び、確認問題と答えを返す。
+
+    「第2回の確認問題を出して」のように、復習用の問題を求められたときに使う。
+    """
+    terms = [entry for entry in load_glossary() if entry["lecture"] == lecture]
+    if not terms:
+        return f"第{lecture}回の用語が用語集にありません。"
+    term = random.choice(terms)
+    return json.dumps(
+        {
+            "question": f"「{term['term']}」の意味は？",
+            "answer": term["definition"],
+        },
+        ensure_ascii=False,
+    )
 
 
 def _normalize(text: str) -> str:
