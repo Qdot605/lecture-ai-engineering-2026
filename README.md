@@ -247,3 +247,53 @@ AIE_MODEL=gemini-3.5-flash uv run python -m app.ask "LoRAとは何ですか？"
 ```
 
 無料枠には1分あたり・1日あたりのリクエスト上限があります。上限は [Gemini API のレート制限のページ](https://ai.google.dev/gemini-api/docs/rate-limits) で確認してください。
+
+## 第6回：MCPサーバーをエージェントから使う
+
+演習手順と記録先：
+[lectures/06/problem.md](lectures/06/problem.md)、
+[lectures/06/answer.md](lectures/06/answer.md)。
+
+### システム構成
+
+| ファイル | 役割 |
+|---|---|
+| `app/mcp_agent.py` | 第6回のMCPクライアント |
+| `app/mcp_server.py` | 既存ツールをMCP経由で公開するサーバー |
+| `app/mcp_servers.json` | MCPサーバーの接続設定 |
+| `app/tools.py` | 第3〜5回のツール実装 |
+| `tests/test_mcp_server.py` | MCP接続・設定・ツール呼び出しのテスト |
+
+### 実行方法
+
+```bash
+# モデルに見えるMCPツール一覧（APIキー不要）
+uv run python -m app.mcp_agent --list-tools
+
+# MCP経由で質問
+uv run python -m app.mcp_agent --trace "LoRAとは何ですか？"
+
+# 既存エージェントの実行
+uv run python -m app.agent --trace "LoRAとは何ですか？"
+
+# Adaptive RAG
+uv run python -m app.agent --adaptive-graph --trace "LoRAとQLoRAの違いは？"
+
+# 全テスト
+uv run pytest -q
+```
+
+### 統合方針
+
+第1〜5回の独自実装を維持し、第6回のMCPクライアントを
+独立した実行経路として追加する。
+
+従来のFunction CallingとMCP経由のツール呼び出しを共存させる。
+
+第6回の演習開始時点では、MCPサーバーに公開するツールを
+search_glossary に限定する。
+make_quiz 等の既存ツール実装は保持し、
+宿題でMCPへの公開を追加する。
+
+学習ログなどの書き込み操作については、
+ユーザー承認を保証できる設計を確認するまでMCPに公開しない。
